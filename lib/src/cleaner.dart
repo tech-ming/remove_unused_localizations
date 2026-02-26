@@ -54,11 +54,13 @@ void runLocalizationCleaner({bool keepUnused = false}) {
   final String keysPattern = allKeys.map(RegExp.escape).join('|');
   final RegExp regex = RegExp(
     r'(?:' // Start non-capturing group for all possible access patterns
-            r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
+            r'(?:[a-zA-Z0-9_]+[?!]?\.)+' // e.g., `l10n.key`、`l10n?.key`、`l10n!.key`
             r'|'
-            r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)\!?\s*\.\s*' // `of(context)!.key` with optional whitespace
+            r'[a-zA-Z0-9_]+\s*\n\s*[?!]?\.' // 换行后访问，如 `l10n\n    .key` 或 `l10n\n    ?.key`
             r'|'
-            r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
+            r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)[?!]?\s*\.\s*' // `of(context)?.key`、`of(context)!.key`
+            r'|'
+            r'[a-zA-Z0-9_]+\.\w+\(\s*\)[?!]?\s*\.\s*' // `SomeClass.method()?.key`
             r')'
             r'(' +
         keysPattern +
